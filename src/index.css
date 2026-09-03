@@ -2,12 +2,11 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Tailwind v4: @theme WITHOUT `inline` keeps colors as CSS vars so html[data-theme="light"] can override at runtime.
-     Using `inline` inlines them to static hex (bg-surface-1:#111) and breaks dynamic theming — hence light mode only flipped borders. */
+  /* Tailwind v4: @theme WITHOUT `inline` keeps colors as CSS vars so html[data-theme="light"] can override at runtime. */
   --font-sans: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Core palette — dark default */
+  /* Core palette — dark default (WCAG AA contrast tuned) */
   --color-background: #090909;
   --color-foreground: #F5F5F5;
 
@@ -26,6 +25,7 @@
 
   /* Extended shadcn/radix tokens — derived from dark */
   --color-ring: #A3A3A3;
+  --color-ring-offset: #090909;
   --color-accent: #222222;
   --color-accent-foreground: #F5F5F5;
   --color-muted: #1A1A1A;
@@ -42,10 +42,33 @@
   --color-destructive-foreground: #FFFFFF;
   --color-input: #262626;
 
+  /* v2 semantic tokens — success / warning / info / chart */
+  --color-success: #22C55E;
+  --color-success-foreground: #052E16;
+  --color-warning: #F59E0B;
+  --color-warning-foreground: #451A03;
+  --color-info: #38BDF8;
+  --color-info-foreground: #0C4A6E;
+  --color-chart-1: #8B5CF6;
+  --color-chart-2: #06B6D4;
+  --color-chart-3: #F43F5E;
+  --color-chart-4: #22C55E;
+  --color-chart-5: #F59E0B;
+
+  /* Focus ring tokens */
+  --ring-width: 2px;
+  --ring-offset: 2px;
+  --ring-color: var(--color-ring);
+
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
+
+  /* Container query tokens */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
 }
 
 /* Light theme override — toggled via data-theme="light" on <html> */
@@ -62,7 +85,8 @@
   --color-border-default: #E5E5E5;
   --color-border-strong: #D4D4D4;
   --color-border-subtle: #F5F5F5;
-  --color-ring: #404040;
+  --color-ring: #0A0A0A;
+  --color-ring-offset: #FAFAFA;
   --color-card: #FFFFFF;
   --color-card-foreground: #0A0A0A;
   --color-popover: #FFFFFF;
@@ -78,6 +102,12 @@
   --color-destructive: #DC2626;
   --color-destructive-foreground: #FFFFFF;
   --color-input: #E5E5E5;
+  --color-success: #16A34A;
+  --color-success-foreground: #F0FDF4;
+  --color-warning: #D97706;
+  --color-warning-foreground: #FFFBEB;
+  --color-info: #0284C7;
+  --color-info-foreground: #F0F9FF;
 }
 
 :root {
@@ -109,10 +139,13 @@ body {
   color: var(--color-background);
 }
 
-/* Focus visible — accessible ring 150-250ms watermelon timing */
+/* Focus visible — accessible ring tokens, higher contrast in light */
 *:focus-visible {
-  outline: 2px solid var(--color-ring);
-  outline-offset: 2px;
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+}
+:root[data-theme="light"] *:focus-visible {
+  --ring-color: #0A0A0A;
 }
 
 /* Custom Scrollbar for sleek developer tool feel */
@@ -152,6 +185,24 @@ body {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
+@keyframes aurora {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  33% { transform: translate(30px, -30px) scale(1.1); opacity: 0.7; }
+  66% { transform: translate(-20px, 20px) scale(0.9); opacity: 0.6; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+}
+@keyframes staggerIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes glassShine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
 .animate-in {
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -160,6 +211,36 @@ body {
 }
 .animate-scale-in {
   animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-aurora {
+  animation: aurora 8s ease-in-out infinite;
+}
+.animate-stagger > * {
+  animation: staggerIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-stagger > *:nth-child(1) { animation-delay: 0.04s; }
+.animate-stagger > *:nth-child(2) { animation-delay: 0.08s; }
+.animate-stagger > *:nth-child(3) { animation-delay: 0.12s; }
+.animate-stagger > *:nth-child(4) { animation-delay: 0.16s; }
+.animate-stagger > *:nth-child(5) { animation-delay: 0.20s; }
+.animate-stagger > *:nth-child(6) { animation-delay: 0.24s; }
+
+/* Glass / aurora surfaces — Aceternity mimic without framer-motion */
+.glass {
+  background: color-mix(in srgb, var(--color-surface-1) 80%, transparent);
+  backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid color-mix(in srgb, var(--color-border-default) 60%, transparent);
+}
+.aurora-bg {
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 30%, color-mix(in srgb, var(--color-chart-1) 18%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 500px 350px at 80% 70%, color-mix(in srgb, var(--color-chart-2) 14%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 700px 300px at 50% 0%, color-mix(in srgb, var(--color-chart-3) 10%, transparent) 0%, transparent 70%);
+}
+.shimmer-bg {
+  background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--color-foreground) 6%, transparent) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: glassShine 2.2s ease-in-out infinite;
 }
 
 /* Smooth theme transitions — respect reduced motion */
@@ -191,4 +272,14 @@ body {
 }
 .hover-lift:active {
   transform: translateY(0px) scale(0.98);
+}
+
+/* Container query support */
+@container (max-width: 640px) {
+  .container-responsive { padding: 1rem; }
+}
+
+/* Premium scrollbar — thin + rounded, respects theme */
+* {
+  scrollbar-width: thin;
 }

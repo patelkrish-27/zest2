@@ -1,0 +1,85 @@
+<mxfile host="drawio-skill" agent="diagram-ir" version="3.0.0">
+  <diagram id="system" name="System">
+    <mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="landing" value="landing (outside wizardFlow)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="landing" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:960 phase init&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:960 phase init&quot;}" data-source-label="landing&#10;(outside wizardFlow)" data-provenance="{&quot;path&quot;:&quot;/tmp/wizard-ir.json&quot;}">
+          <mxGeometry x="60" y="80" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="project" value="project 01 Project" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="project" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:1199&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:1199&quot;}" data-source-label="project&#10;01 Project" data-provenance="{&quot;path&quot;:&quot;/tmp/wizard-ir.json&quot;}">
+          <mxGeometry x="290" y="80" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="frontend" value="frontend 02 Frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="frontend" data-kind="service" data-properties="{}" data-source-properties="{}" data-source-label="frontend&#10;02 Frontend" data-provenance="{&quot;path&quot;:&quot;/tmp/wizard-ir.json&quot;}">
+          <mxGeometry x="520" y="80" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="backend" value="backend 03 Backend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="backend" data-kind="service" data-properties="{}" data-source-properties="{}" data-source-label="backend&#10;03 Backend" data-provenance="{&quot;path&quot;:&quot;/tmp/wizard-ir.json&quot;}">
+          <mxGeometry x="750" y="80" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="arch" value="architecture 04 Architecture" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="arch" data-kind="service" data-properties="{}" data-source-properties="{}" data-source-label="architecture&#10;04 Architecture" data-provenance="{&quot;path&quot;:&quot;/tmp/wizard-ir.json&quot;}">
+          <mxGeometry x="60" y="230" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="theme" value="theme 05 Visual Style" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="theme" data-kind="service" data-properties="{}" data-source-properties="{}" data-source-label="theme&#10;05 Visual Style" data-provenance="{&quot;path&quot;:&quot;/tmp/wizard-ir.json&quot;}">
+          <mxGeometry x="290" y="230" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="skills" value="skills 06 Skills" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="skills" data-kind="service" data-properties="{}" data-source-properties="{}" data-source-label="skills&#10;06 Skills" data-provenance="{&quot;path&quot;:&quot;/tmp/wizard-ir.json&quot;}">
+          <mxGeometry x="520" y="230" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="custom" value="customPages[] (dynamic)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="custom" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:1205&quot;,&quot;note&quot;:&quot;...config.customPages.map(p=&gt;p.id)&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:1205&quot;,&quot;note&quot;:&quot;...config.customPages.map(p=&gt;p.id)&quot;}" data-source-label="customPages[]&#10;(dynamic)" data-provenance="{&quot;path&quot;:&quot;/tmp/wizard-ir.json&quot;}">
+          <mxGeometry x="750" y="230" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="prompt" value="prompt AI Prompt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="prompt" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:1219 generatePrompt&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:1219 generatePrompt&quot;}" data-source-label="prompt&#10;AI Prompt" data-provenance="{&quot;path&quot;:&quot;/tmp/wizard-ir.json&quot;}">
+          <mxGeometry x="60" y="380" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="response" value="response Response" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="response" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:1362 processResponse&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:1362 processResponse&quot;}" data-source-label="response&#10;Response" data-provenance="{&quot;path&quot;:&quot;/tmp/wizard-ir.json&quot;}">
+          <mxGeometry x="290" y="380" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="blueprint" value="blueprint Blueprint (zip)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="blueprint" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:1389 downloadZip&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:1389 downloadZip&quot;}" data-source-label="blueprint&#10;Blueprint (zip)" data-provenance="{&quot;path&quot;:&quot;/tmp/wizard-ir.json&quot;}">
+          <mxGeometry x="520" y="380" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="admin" value="admin (outside wizardFlow)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="admin" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:1468 handleAdminAuth&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:1468 handleAdminAuth&quot;}" data-source-label="admin&#10;(outside wizardFlow)" data-provenance="{&quot;path&quot;:&quot;/tmp/wizard-ir.json&quot;}">
+          <mxGeometry x="750" y="380" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="derived" value="Derived: currentIndex = indexOf(phase) prevPhase / nextPhase" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="derived" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:1211&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:1211&quot;}" data-source-label="Derived:&#10;currentIndex = indexOf(phase)&#10;prevPhase / nextPhase" data-provenance="{&quot;path&quot;:&quot;/tmp/wizard-ir.json&quot;}">
+          <mxGeometry x="60" y="530" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-0" value="Start" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="landing" target="project" data-model-id="e1" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="Start">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-1" value="Next" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="project" target="frontend" data-model-id="e2" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="Next">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-2" value="Next" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="frontend" target="backend" data-model-id="e3" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="Next">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-3" value="Next" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="backend" target="arch" data-model-id="e4" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="Next">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-4" value="Next" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="arch" target="theme" data-model-id="e5" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="Next">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-5" value="Next" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="theme" target="skills" data-model-id="e6" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="Next">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-6" value="Next (if any)" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="skills" target="custom" data-model-id="e7" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="Next (if any)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-7" value="Next" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="custom" target="prompt" data-model-id="e8" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="Next">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-8" value="Next" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="prompt" target="response" data-model-id="e9" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="Next">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-9" value="parse -&gt; zip" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="response" target="blueprint" data-model-id="e10" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="parse -&gt; zip">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-10" value="creates customPages" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="admin" target="custom" data-model-id="e11" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="creates customPages">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-11" value="governs nav" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="derived" target="project" data-model-id="e12" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="governs nav">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

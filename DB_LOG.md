@@ -45,3 +45,10 @@
 - [ ] Optional: `npx supabase gen types typescript --linked > src/lib/database.types.ts` after first push.
 - [ ] QA: verify `npx supabase inspect db table-stats` + advisors green; fix `bookMySeat` RLS separately if desired.
 - Status: idle ◆ — DB pane 1.4 tasks 1-5 complete, awaiting Backend/QA.
+
+## 2026-09-03 — v2.0 audit (Orchestration v2.0)
+
+- Audited by Orchestration pane: no schema drift since 001_initial; 9-table canonical still matches `src/App.tsx:79-117` AppState mapped in `SUPABASE_SYNC.md` §1. `DB_LOG.md` placeholder reflects v2 state: hardened decisions (pgcrypto, RLS, permissive policies documented for hardening) unchanged.
+- Blockers unchanged: cloud project creation + `db push` + `gen types` remain manual (see `MANAGER_CHECKLIST.md` v2 gates). `docs/architecture.drawio` marks Supabase as placeholder node — consistent with this log.
+- No code break: `pnpm build:backend` not affected; `src/lib/supabaseClient.ts` placeholder keeps `pnpm build` green without env.
+- Status: idle ◆ — v2.0 DBAudit: PENDING -> scaffold DONE, remote sync still PENDING (documented).

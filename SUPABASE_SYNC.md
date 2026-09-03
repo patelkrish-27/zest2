@@ -132,4 +132,11 @@ If `error.code === "42P01"` (relation does not exist) → migrations not applied
 
 ---
 
-Idle ◆ — DB pane 1.4. See `DB_LOG.md` for timestamped progress.
+## 9. v2.0 State (2026-09-03 — Orchestration v2.0)
+
+- **Pending**: remote project for zest not yet created; scaffold is canonical. `docs/architecture.drawio` shows Supabase as placeholder node with edge `repo -> Supabase (pending)`.
+- **Verified**: `supabase/migrations/001_initial.sql` + `supabase/seed.sql` + `src/lib/supabaseClient.ts` + `.env.example` unchanged since v1.4; `pnpm build:backend` not affected (no Supabase import in `src/backend`).
+- **Next**: create cloud project in org `jxrijyqlafgzhueqeoxp` (`ap-south-1`), `npx supabase link` + `db push`, then `npx supabase gen types typescript --linked > src/lib/database.types.ts`, then swap `src/backend/repositories/blueprintRepository.ts` to Supabase implementation.
+- Back-compat: `VITE_SUPABASE_URL=http://127.0.0.1:54321` placeholder keeps `pnpm build` green when DB not linked.
+
+Idle ◆ — DB pane 1.4. See `DB_LOG.md` for timestamped progress. v2.0 audit: no schema drift; docs/architecture.drawio added; ORCHESTRATION.md gate documented.

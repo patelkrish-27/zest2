@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from "react"
 import {
   ChevronRight,
   ChevronLeft,
@@ -49,6 +49,19 @@ import { Badge } from "@/components/ui/badge"
 import { SelectCard, MultiSelectCard } from "@/components/ui/select-card"
 import { ThemeCard } from "@/components/ui/theme-card"
 import { Separator } from "@/components/ui/separator"
+import { Progress } from "@/components/ui/progress"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
+import { Tooltip } from "@/components/ui/tooltip"
+import { useDebounce } from "@/hooks/useDebounce"
+import { useThemeSync } from "@/hooks/useThemeSync"
+import { useWizard } from "@/hooks/useWizard"
+import { useSkillSync } from "@/hooks/useSkillSync"
+import { useLocalDraft } from "@/hooks/useLocalDraft"
+import { parseFilesFromResponse } from "@/lib/parse"
+import { generatePrompt as generatePromptPure } from "@/lib/prompt"
+import { WizardSidebar } from "@/components/wizard/WizardSidebar"
+import { WizardNav } from "@/components/wizard/WizardNav"
 
 // --- Types ---
 type Phase = string // Expanded to string to support dynamic custom pages
@@ -134,306 +147,13 @@ interface AppState {
 }
 
 // --- Skills Catalog (project skills – corresponds to /skills/*) ---
-export const SKILLS_CATALOG: Skill[] = [
-  {
-    id: "chakra-ui",
-    name: "Chakra UI",
-    description: "Accessible, modern and easy to style UI components.",
-    category: "UI Library",
-    docsUrl: "docs/components/concepts/overview",
-    source: "apps/www/content/docs/components/concepts/overview.mdx",
-    rawUrl:
-      "https://raw.githubusercontent.com/chakra-ui/chakra-ui/refs/heads/main/apps/www/content/docs/components/concepts/overview.mdx",
-    package: "@chakra-ui/react",
-    installCmd:
-      "npx skills add https://github.com/chakra-ui/chakra-ui/tree/main/skills",
-    concepts: "Components > Concepts > Components",
-    highlights: [
-      "ComponentGrid catalogue — full primitives list",
-      "Accessible by default (ARIA, focus, keyboard)",
-      "Style props + recipes/slotRecipes theming",
-      "Composable primitives (Box, Flex, Grid, Stack)",
-      "npx skills: chakra-ui-builder · chakra-ui-migrate · chakra-ui-refactor",
-    ],
-  },
-  {
-    id: "chakra-ui-builder",
-    name: "Chakra UI — Builder",
-    description:
-      "Generate new Chakra UI components and layouts with best-practice patterns.",
-    category: "UI Library",
-    docsUrl: "docs/components/concepts/overview",
-    source: "skills/chakra-ui-builder/SKILL.md",
-    rawUrl:
-      "https://github.com/chakra-ui/chakra-ui/tree/main/skills/chakra-ui-builder",
-    package: "@chakra-ui/react",
-    installCmd:
-      "npx skills add https://github.com/chakra-ui/chakra-ui/tree/main/skills/chakra-ui-builder",
-    concepts: "Builder · Components",
-    highlights: ["Scaffold components", "Layout recipes", "Theming tokens"],
-  },
-  {
-    id: "chakra-ui-migrate",
-    name: "Chakra UI — Migrate",
-    description: "Migrate existing UI code to Chakra UI v3 idioms and props.",
-    category: "UI Library",
-    docsUrl: "docs/components/concepts/overview",
-    source: "skills/chakra-ui-migrate/SKILL.md",
-    rawUrl:
-      "https://github.com/chakra-ui/chakra-ui/tree/main/skills/chakra-ui-migrate",
-    package: "@chakra-ui/react",
-    installCmd:
-      "npx skills add https://github.com/chakra-ui/chakra-ui/tree/main/skills/chakra-ui-migrate",
-    concepts: "Migrate · Codemod",
-    highlights: ["v2 → v3 migration", "Prop mapping", "Codemod guidance"],
-  },
-  {
-    id: "chakra-ui-refactor",
-    name: "Chakra UI — Refactor",
-    description:
-      "Refactor and clean up Chakra UI code — DRY up style props, recipes and composition.",
-    category: "UI Library",
-    docsUrl: "docs/components/concepts/overview",
-    source: "skills/chakra-ui-refactor/SKILL.md",
-    rawUrl:
-      "https://github.com/chakra-ui/chakra-ui/tree/main/skills/chakra-ui-refactor",
-    package: "@chakra-ui/react",
-    installCmd:
-      "npx skills add https://github.com/chakra-ui/chakra-ui/tree/main/skills/chakra-ui-refactor",
-    concepts: "Refactor · Best practices",
-    highlights: ["Prop hygiene", "Slot recipes", "Composition cleanup"],
-  },
-  {
-    id: "shadcn-ui",
-    name: "shadcn/ui",
-    description:
-      "Accessible, composable React components built on Radix UI + Tailwind CSS.",
-    category: "UI Library",
-    docsUrl: "ui.shadcn.com/docs/components",
-    source: "skills/shadcn-ui/SKILL.md",
-    rawUrl: "https://github.com/shadcn-ui/ui",
-    package: "shadcn/ui",
-    installCmd: "pnpm dlx skills add shadcn/ui",
-    concepts: "Components · Radix · Tailwind",
-    highlights: [
-      "Copy-paste primitives",
-      "Radix + Tailwind",
-      "CSS variables theming",
-      "pnpm dlx skills add shadcn/ui",
-    ],
-  },
-  {
-    id: "aceternity-ui",
-    name: "Aceternity UI",
-    description:
-      "Animated, modern React + Tailwind + Framer Motion components.",
-    category: "UI Library",
-    docsUrl: "ui.aceternity.com/components",
-    source: "skills/aceternity-ui/SKILL.md",
-    rawUrl: "https://github.com/secondsky/claude-skills",
-    package: "aceternity-ui",
-    installCmd:
-      "npx skills add https://github.com/secondsky/claude-skills --skill aceternity-ui",
-    concepts: "Motion · Effects · Framer",
-    highlights: [
-      "Spotlight & Beams",
-      "3D Card & Bento",
-      "Framer Motion + Tailwind",
-      "npx skills --skill aceternity-ui",
-    ],
-  },
-  {
-    id: "ui-skills-root",
-    name: "UI Skills — Root (ibelick)",
-    description:
-      "Overall meta UI skill aggregating modern copy-paste React + Tailwind patterns.",
-    category: "UI Library",
-    docsUrl: "github.com/ibelick/ui-skills",
-    source: "skills/ui-skills-root/SKILL.md",
-    rawUrl: "https://github.com/ibelick/ui-skills",
-    package: "ui-skills",
-    installCmd:
-      "npx skills add https://github.com/ibelick/ui-skills --skill ui-skills-root",
-    concepts: "Meta · Components · Tailwind",
-    highlights: [
-      "Overall UI baseline",
-      "Copy-paste + cn + CSS vars",
-      "Composes with shadcn/Chakra/Aceternity",
-      "npx skills --skill ui-skills-root",
-    ],
-  },
-  {
-    id: "watermelon-ui",
-    name: "Watermelon UI — Make Interfaces Feel Better",
-    description:
-      "Micro-interactions, skeletons, optimistic UI and feel-better UX polish.",
-    category: "UI Library",
-    docsUrl:
-      "github.com/WatermelonCorp/watermelon-platform/tree/main/skills/make-interfaces-feel-better",
-    source: "skills/watermelon-ui/SKILL.md",
-    rawUrl: "https://github.com/WatermelonCorp/watermelon-platform",
-    package: "watermelon-ui",
-    installCmd:
-      "npx skills add https://github.com/WatermelonCorp/watermelon-platform --skill make-interfaces-feel-better",
-    concepts: "Polish · Motion · Skeletons",
-    highlights: [
-      "Optimistic UI & skeletons",
-      "Empty states & micro-copy",
-      "150-250ms feel polish",
-      "npx skills --skill make-interfaces-feel-better",
-    ],
-  },
-  {
-    id: "supabase",
-    name: "Supabase — Agent Skills",
-    description:
-      "Supabase Postgres/Auth/Storage/Realtime/Edge Functions skills for correct, secure usage.",
-    category: "Backend",
-    docsUrl: "supabase.com/docs/guides/getting-started/ai-skills",
-    source: "skills/supabase/SKILL.md",
-    rawUrl: "https://github.com/supabase/agent-skills",
-    package: "supabase",
-    installCmd: "npx skills add supabase/agent-skills",
-    concepts: "Postgres · Auth · RLS · Storage",
-    highlights: [
-      "RLS & migrations",
-      "supabase-js / ssr helpers",
-      "Auth + Storage + Realtime",
-      "npx skills add supabase/agent-skills",
-    ],
-  },
-  {
-    id: "frontend-patterns",
-    name: "Frontend Patterns (React/Next)",
-    description:
-      "React, Next.js, state, perf, forms, a11y — composition, hooks, memo, virtualization. Best-practice patterns.",
-    category: "Frontend",
-    docsUrl:
-      "skillsmp.com/creators/affaan-m/ecc/agents-skills-frontend-patterns",
-    source: "skills/frontend-patterns/SKILL.md",
-    rawUrl:
-      "https://github.com/affaan-m/ECC/tree/main/.agents/skills/frontend-patterns",
-    package: "frontend-patterns",
-    installCmd:
-      "npx skills add https://github.com/affaan-m/ECC --skill frontend-patterns",
-    concepts: "React · Next.js · Hooks · Perf",
-    highlights: [
-      "Composition & compound components",
-      "useQuery/useDebounce hooks",
-      "Memo/virtualization/code-split",
-      "npx skills --skill frontend-patterns",
-    ],
-  },
-  {
-    id: "backend-patterns",
-    name: "Backend Patterns (Node/Express)",
-    description:
-      "API design, repository/service layers, DB optimization, caching, auth, rate-limit, queues and logging.",
-    category: "Backend",
-    docsUrl:
-      "skillsmp.com/creators/affaan-m/ecc/agents-skills-backend-patterns",
-    source: "skills/backend-patterns/SKILL.md",
-    rawUrl:
-      "https://github.com/affaan-m/ECC/tree/main/.agents/skills/backend-patterns",
-    package: "backend-patterns",
-    installCmd:
-      "npx skills add https://github.com/affaan-m/ECC --skill backend-patterns",
-    concepts: "API · DB · Cache · Auth",
-    highlights: [
-      "REST + repository/service",
-      "N+1 & query opt + transactions",
-      "Redis cache-aside & rate-limit",
-      "npx skills --skill backend-patterns",
-    ],
-  },
-  {
-    id: "ui-styling",
-    name: "UI Styling (ui-ux-pro-max)",
-    description:
-      "shadcn/ui + Tailwind + canvas — components, theming, responsive, a11y, visual design. 98 files incl. scripts & references.",
-    category: "Frontend",
-    docsUrl:
-      "skillsmp.com/creators/nextlevelbuilder/ui-ux-pro-max-skill/claude-skills-ui-styling",
-    source: "skills/ui-styling/SKILL.md",
-    rawUrl:
-      "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/tree/main/.claude/skills/ui-styling",
-    package: "ui-styling",
-    installCmd:
-      "npx skills add https://github.com/nextlevelbuilder/ui-ux-pro-max-skill --skill ui-styling",
-    concepts: "shadcn · Tailwind · Canvas",
-    highlights: [
-      "shadcn + Tailwind + Radix",
-      "7 references + 2 python scripts + 64 fonts",
-      "Responsive & dark mode & a11y",
-      "npx skills --skill ui-styling",
-    ],
-  },
-  {
-    id: "drawio-skill",
-    name: "Draw.io — Architecture Studio",
-    description:
-      "Editable .drawio diagrams — IR build/sync, 31 importers, exports PNG/SVG/PDF, validation. 75 files.",
-    category: "Design",
-    docsUrl:
-      "skillsmp.com/creators/agents365-ai/drawio-skill/skills-drawio-skill",
-    source: "skills/drawio-skill/SKILL.md",
-    rawUrl:
-      "https://github.com/Agents365-ai/drawio-skill/tree/main/skills/drawio-skill",
-    package: "drawio-skill",
-    installCmd:
-      "npx skills add https://github.com/Agents365-ai/drawio-skill --skill drawio-skill",
-    concepts: "Diagram · IR · Autolayout",
-    highlights: [
-      "diagramctl build/sync/views/test",
-      "41 scripts + 20 refs + 5 styles",
-      "draw.io CLI + Graphviz dot",
-      "npx skills --skill drawio-skill",
-    ],
-  },
-  {
-    id: "autoreview",
-    name: "Autoreview — Structured Code Review",
-    description:
-      "Codex/Claude/Amp/Pi/Kimi review helper with TruffleHog secret scan, P0/P3 triage. Use when explicitly requested.",
-    category: "Testing",
-    docsUrl: "skillsmp.com/creators/openclaw/openclaw/agents-skills-autoreview",
-    source: "skills/autoreview/SKILL.md",
-    rawUrl:
-      "https://github.com/openclaw/openclaw/tree/main/.agents/skills/autoreview",
-    package: "autoreview",
-    installCmd:
-      "npx skills add https://github.com/openclaw/openclaw --skill autoreview",
-    concepts: "Review · TruffleHog · Isolation",
-    highlights: [
-      "Codex gpt-5.6-sol high + fallback",
-      "TruffleHog secret scan",
-      "P0 only default triage",
-      "npx skills --skill autoreview",
-    ],
-  },
-  {
-    id: "agent-orchestrator-task",
-    name: "Agent Orchestrator — Task",
-    description:
-      "Central task decomposition, parallel/sequential planning, dependency & progress tracking. Invoke $agent-orchestrator-task.",
-    category: "Orchestration",
-    docsUrl:
-      "skillsmp.com/creators/ruvnet/ruflo/agents-skills-agent-orchestrator-task",
-    source: "skills/agent-orchestrator-task/SKILL.md",
-    rawUrl:
-      "https://github.com/ruvnet/ruflo/tree/main/.agents/skills/agent-orchestrator-task",
-    package: "agent-orchestrator-task",
-    installCmd:
-      "npx skills add https://github.com/ruvnet/ruflo --skill agent-orchestrator-task",
-    concepts: "Orchestration · Decomposition · Synthesis",
-    highlights: [
-      "Task decomposition & dependency graph",
-      "Parallel/sequential/adaptive strategy",
-      "TodoWrite progress + memory_store",
-      "npx skills --skill agent-orchestrator-task",
-    ],
-  },
-]
+// Source of truth lives in @/lib/skillsCatalog so the backend can import it too.
+// Re-exported here for backward compatibility with existing imports.
+import { SKILLS_CATALOG as _SHARED_SKILLS_CATALOG, type Skill as _SharedSkill } from "@/lib/skillsCatalog"
+export const SKILLS_CATALOG: _SharedSkill[] = [..._SHARED_SKILLS_CATALOG] as unknown as _SharedSkill[]
+
+// Legacy inline literal removed in v2.0 — single source of truth at @/lib/skillsCatalog.
+// (Original 15-item block was here at App.tsx:150-449 before refactor.)
 
 const INITIAL_CONFIG: AppConfig = {
   projectTypes: ["Website", "Web App", "Mobile App", "Desktop", "API", "Other"],
@@ -983,20 +703,17 @@ export default function App() {
   const [skillFilter, setSkillFilter] = useState<string>("All")
   const [skillSearch, setSkillSearch] = useState<string>("")
   const [skillDetail, setSkillDetail] = useState<string | null>(null)
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false)
+  const [promptCopiedAt, setPromptCopiedAt] = useState<number | null>(null)
+  const [blueprintActive, setBlueprintActive] = useState(0)
 
-  // Theme toggle — sync state.themeModifiers.mode to document data-theme for Tailwind v4 tokens
-  useEffect(() => {
-    const mode = state.themeModifiers.mode
-    const resolved =
-      mode === "auto"
-        ? window.matchMedia("(prefers-color-scheme: light)").matches
-          ? "light"
-          : "dark"
-        : mode
-    document.documentElement.setAttribute("data-theme", resolved)
-  }, [state.themeModifiers.mode])
+  // v2.0 hooks: theme sync, wizard flow, local draft, debounce
+  useThemeSync(state.themeModifiers.mode)
+  const debouncedSkillSearch = useDebounce(skillSearch, 300)
+  useLocalDraft(state, config, phase)
+  const { wizardFlow, currentIndex, prevPhase, nextPhase } = useWizard(phase, config)
 
-  // Keyboard a11y: Escape closes skill drawer / mobile nav
+  // Keyboard a11y: Escape closes skill drawer / mobile nav (also handles focus trap for Dialog)
   useEffect(() => {
     if (!skillDetail && !mobileOpen) return
     const onKey = (e: KeyboardEvent) => {
@@ -1009,12 +726,12 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey)
   }, [skillDetail, mobileOpen])
 
-  // --- Logic Helpers ---
-  const updateState = (key: keyof AppState, value: any) => {
+  // --- Logic Helpers (v2.0: useCallback memoized) ---
+  const updateState = useCallback((key: keyof AppState, value: any) => {
     setState((prev) => ({ ...prev, [key]: value }))
-  }
+  }, [])
 
-  const toggleArrayItem = (key: "features" | "uiLibraries", item: string) => {
+  const toggleArrayItem = useCallback((key: "features" | "uiLibraries", item: string) => {
     setState((prev) => {
       const arr = prev[key] as string[]
       const isRemoving = arr.includes(item)
@@ -1071,70 +788,44 @@ export default function App() {
       }
       return { ...prev, [key]: [...arr, item], selectedSkills: nextSelected }
     })
-  }
+  }, [])
 
-  const setCustomSingle = (sectionId: string, value: string) => {
+  const setCustomSingle = useCallback((sectionId: string, value: string) => {
     setState((prev) => ({
       ...prev,
-      customAnswers: {
-        ...prev.customAnswers,
-        [sectionId]: value,
-      },
+      customAnswers: { ...prev.customAnswers, [sectionId]: value },
     }))
-  }
+  }, [])
 
-  const toggleCustomMulti = (sectionId: string, value: string) => {
+  const toggleCustomMulti = useCallback((sectionId: string, value: string) => {
     setState((prev) => {
       const current = prev.customAnswers[sectionId]
       const arr = Array.isArray(current) ? current : []
       if (arr.includes(value)) {
-        return {
-          ...prev,
-          customAnswers: {
-            ...prev.customAnswers,
-            [sectionId]: arr.filter((i) => i !== value),
-          },
-        }
+        return { ...prev, customAnswers: { ...prev.customAnswers, [sectionId]: arr.filter((i) => i !== value) } }
       }
-      return {
-        ...prev,
-        customAnswers: { ...prev.customAnswers, [sectionId]: [...arr, value] },
-      }
+      return { ...prev, customAnswers: { ...prev.customAnswers, [sectionId]: [...arr, value] } }
     })
-  }
+  }, [])
 
-  const setThemeModifier = (groupId: string, value: string) => {
-    setState((prev) => ({
-      ...prev,
-      themeModifiers: { ...prev.themeModifiers, [groupId]: value },
-    }))
-  }
+  const setThemeModifier = useCallback((groupId: string, value: string) => {
+    setState((prev) => ({ ...prev, themeModifiers: { ...prev.themeModifiers, [groupId]: value } }))
+  }, [])
 
-  const toggleThemeExtra = (id: string) => {
+  const toggleThemeExtra = useCallback((id: string) => {
     setState((prev) => {
-      if (prev.themeExtras.includes(id)) {
-        return {
-          ...prev,
-          themeExtras: prev.themeExtras.filter((x) => x !== id),
-        }
-      }
+      if (prev.themeExtras.includes(id)) return { ...prev, themeExtras: prev.themeExtras.filter((x) => x !== id) }
       return { ...prev, themeExtras: [...prev.themeExtras, id] }
     })
-  }
+  }, [])
 
-  const applyFontPairing = (pairId: string) => {
+  const applyFontPairing = useCallback((pairId: string) => {
     const pairing = FONT_PAIRINGS.find((p) => p.id === pairId)
     if (!pairing) return
-    setState((prev) => ({
-      ...prev,
-      fontPairing: pairId,
-      fontHeading: pairing.heading,
-      fontBody: pairing.body,
-      fontMono: pairing.mono,
-    }))
-  }
+    setState((prev) => ({ ...prev, fontPairing: pairId, fontHeading: pairing.heading, fontBody: pairing.body, fontMono: pairing.mono }))
+  }, [])
 
-  const toggleSkill = (skillId: string) => {
+  const toggleSkill = useCallback((skillId: string) => {
     setState((prev) => {
       const has = prev.selectedSkills.includes(skillId)
       // Auto-sync uiLibraries / database when skill toggled
@@ -1185,162 +876,42 @@ export default function App() {
         database: nextDatabase,
       }
     })
-  }
+  }, [])
 
-  // --- Wizard Flow Management ---
-  const wizardFlow = [
-    "project",
-    "frontend",
-    "backend",
-    "architecture",
-    "theme",
-    "skills",
-    ...config.customPages.map((p) => p.id),
-    "prompt",
-    "response",
-    "blueprint",
-  ]
+  // --- Wizard Flow Management (v2.0 via useWizard) ---
+  // wizardFlow/currentIndex/prevPhase/nextPhase provided by useWizard hook above
 
-  const currentIndex = wizardFlow.indexOf(phase)
-  const prevPhase = currentIndex > 0 ? wizardFlow[currentIndex - 1] : null
-  const nextPhase =
-    currentIndex > -1 && currentIndex < wizardFlow.length - 1
-      ? wizardFlow[currentIndex + 1]
-      : null
-
-  // --- Prompt Generation ---
-  const generatePrompt = () => {
-    let customPrompts = ""
-    config.customSections.forEach((section) => {
-      const answer = state.customAnswers[section.id]
-      if (answer && (typeof answer === "string" || answer.length > 0)) {
-        const answerStr = Array.isArray(answer) ? answer.join(", ") : answer
-        customPrompts += `${section.title}: ${answerStr}\n`
-      }
-    })
-
-    const themeName =
-      THEMES.find((t) => t.id === state.theme)?.name ||
-      state.theme ||
-      "Not specified"
-    const themeDetails = THEMES.find((t) => t.id === state.theme)
-    const modifierStr = Object.entries(state.themeModifiers)
-      .map(([k, v]) => {
-        const g = MODIFIER_GROUPS.find((x) => x.id === k)
-        return `${g?.label || k}: ${v}`
-      })
-      .join(" | ")
-    const extrasStr = state.themeExtras.length
-      ? state.themeExtras
-          .map((id) => SUB_THEMES.find((s) => s.id === id)?.label || id)
-          .join(", ")
-      : "None"
-
-    const pairing = FONT_PAIRINGS.find((p) => p.id === state.fontPairing)
-    const fontPrimary =
-      FONTS.find((f) => f.name === state.fontHeading)?.name || state.fontHeading
-
-    // Skills prompt injection
-    const allSkills = [
+  // --- Prompt Generation (v2.0 pure lib + memoization) ---
+  const allSkills = useMemo(
+    () => [
       ...SKILLS_CATALOG,
-      ...config.skillsCatalog.filter(
-        (s) => !SKILLS_CATALOG.find((c) => c.id === s.id),
-      ),
-    ]
-    const selectedSkillObjs = allSkills.filter((s) =>
-      state.selectedSkills.includes(s.id),
-    )
-    const skillsPrompt =
-      selectedSkillObjs.length > 0
-        ? `# SKILLS (installed project skills — must be used in generated code/docs)\n${selectedSkillObjs.map((s) => `- ${s.name} [${s.id}] — ${s.description} (source: ${s.source} | docs: ${s.docsUrl} | package: ${s.package} | concepts: ${s.concepts}) — install: \`${s.installCmd}\``).join("\n")}\n\nSKILL RULES:\n${selectedSkillObjs.map((s) => `- For ${s.name}: use \`${s.package}\` as primary primitive; follow its docs at ${s.docsUrl} (raw: ${s.rawUrl}). Highlights: ${s.highlights.join(" · ")}`).join("\n")}\n`
-        : "# SKILLS\nNo additional skills installed.\n"
-    return `You are an expert software architect. Based on the following project blueprint, please generate comprehensive documentation and architecture markdown files. 
+      ...config.skillsCatalog.filter((s) => !SKILLS_CATALOG.find((c) => c.id === s.id)),
+    ],
+    [config.skillsCatalog],
+  )
+  const themeDetails = useMemo(() => THEMES.find((t) => t.id === state.theme), [state.theme])
+  const generatePrompt = useCallback(
+    () =>
+      generatePromptPure(state, config, {
+        themes: THEMES,
+        modifierGroups: MODIFIER_GROUPS,
+        subThemes: SUB_THEMES,
+        fonts: FONTS,
+        fontPairings: FONT_PAIRINGS,
+        catalog: allSkills,
+      }),
+    [state, config, allSkills],
+  )
+  // Fallback inline prompt builder kept for reference (delegated to pure lib above)
 
-# PROJECT OVERVIEW
-Name: ${state.projectName || "Untitled"}
-Type: ${state.projectType || "Not specified"}
-Problem Statement: ${state.problemStatement || "Not specified"}
-
-# FRONTEND
-Framework: ${state.frontendFramework || "Not specified"}
-UI Libraries: ${state.uiLibraries.join(", ") || "Not specified"}
-Features: ${state.features.join(", ") || "None specified"}
-
-# BACKEND
-Framework: ${state.backendFramework || "Not specified"}
-Database: ${state.database || "Not specified"}
-
-# ARCHITECTURE DETAILS
-Pages/Routes:
-${state.pages || "Not specified"}
-
-Components:
-${state.components || "Not specified"}
-
-Database Tables:
-${state.dbTables || "Not specified"}
-
-# VISUAL STYLE & THEME
-Primary Theme: ${themeName}${
-      themeDetails ? ` — ${themeDetails.feel} (${themeDetails.traits})` : ""
-    }
-Modifiers: ${modifierStr || "Not specified"}
-Additional Layers: ${extrasStr}
-Theme Combination Summary: ${
-      themeName !== "Not specified"
-        ? `${modifierStr} + ${themeName}${
-            extrasStr !== "None" ? ` + ${extrasStr}` : ""
-          }`
-        : "Not specified"
-    }
-
-# TYPOGRAPHY
-Primary / Heading Font: ${state.fontHeading || "Not specified"}${
-      fontPrimary
-        ? ` (${FONTS.find((f) => f.name === state.fontHeading)?.vibe || ""})`
-        : ""
-    }
-Body / UI Font: ${state.fontBody || "Not specified"}
-Monospace / Code Font: ${state.fontMono || "Not specified"}
-Font Pairing Preset: ${
-      pairing
-        ? `${pairing.label} — ${pairing.vibe} (Heading: ${pairing.heading} / Body: ${pairing.body} / Mono: ${pairing.mono})`
-        : state.fontPairing || "Custom"
-    }
-Typography Summary: Headings → ${state.fontHeading || "—"} | Body/UI → ${state.fontBody || "—"} | Code/Meta → ${state.fontMono || "—"}
-
-${skillsPrompt}
-${customPrompts ? `# ADDITIONAL REQUIREMENTS\n${customPrompts}\n` : ""}---
-Please provide your response strictly as a series of markdown files. Use the following format exactly for each file:
-
---- FILE: FILENAME.md ---
-(File content here)
---- END FILE ---
-
-Required files to generate:
-1. PROJECT_CONTEXT.md
-2. PRODUCT_REQUIREMENTS.md
-3. FRONTEND_ARCHITECTURE.md
-4. BACKEND_ARCHITECTURE.md
-5. DATABASE.md
-6. DEVELOPMENT_RULES.md
-`
-  }
-
-  const handleCopyPrompt = async () => {
-    // Try backend first (Vite proxy /api -> Express), fallback to local generatePrompt()
+  const handleCopyPrompt = useCallback(async () => {
     try {
       const { prompt } = await backendClient.generatePromptWithFallback(
         state as unknown as Record<string, unknown> as never,
         () => generatePrompt(),
         {
           customSections: config.customSections,
-          skillsCatalog: [
-            ...SKILLS_CATALOG,
-            ...config.skillsCatalog.filter(
-              (s) => !SKILLS_CATALOG.find((c) => c.id === s.id),
-            ),
-          ] as never,
+          skillsCatalog: allSkills as never,
         },
       )
       await navigator.clipboard.writeText(prompt)
@@ -1348,37 +919,23 @@ Required files to generate:
       await navigator.clipboard.writeText(generatePrompt())
     }
     setCopied(true)
+    setPromptCopiedAt(Date.now())
     setTimeout(() => setCopied(false), 2000)
-  }
+  }, [state, config.customSections, allSkills, generatePrompt])
 
-  const processResponse = async () => {
+  const processResponse = useCallback(async () => {
     if (!state.aiResponse.trim()) return
-    // Prefer backend parse (validates file format server-side), fallback to local regex
-    const fallback = () => {
-      const fileRegex =
-        /---\s*FILE:\s*([a-zA-Z0-9_.-]+)\s*---([\s\S]*?)---\s*END FILE\s*---/g
-      const files: { name: string; content: string }[] = []
-      let match
-      while ((match = fileRegex.exec(state.aiResponse)) !== null) {
-        files.push({ name: match[1].trim(), content: match[2].trim() })
-      }
-      if (files.length === 0)
-        files.push({ name: "AI_OUTPUT_RAW.md", content: state.aiResponse })
-      return files
-    }
+    const fallback = () => parseFilesFromResponse(state.aiResponse)
     try {
-      const { files } = await backendClient.parseResponseWithFallback(
-        state.aiResponse,
-        fallback,
-      )
+      const { files } = await backendClient.parseResponseWithFallback(state.aiResponse, fallback)
       setParsedFiles(files)
     } catch {
       setParsedFiles(fallback())
     }
     setPhase("blueprint")
-  }
+  }, [state.aiResponse])
 
-  const downloadZip = async () => {
+  const downloadZip = useCallback(async () => {
     const zip = new JSZip()
     const folder =
       zip.folder(
@@ -1440,11 +997,8 @@ Blueprint: ${state.projectName || "Untitled"} · ${state.selectedSkills.join(", 
     }
 
     const content = await zip.generateAsync({ type: "blob" })
-    saveAs(
-      content,
-      `${state.projectName.toLowerCase().replace(/\s+/g, "-") || "project"}-blueprint.zip`,
-    )
-  }
+    saveAs(content, `${state.projectName.toLowerCase().replace(/\s+/g, "-") || "project"}-blueprint.zip`)
+  }, [state.projectName, state.selectedSkills, parsedFiles, allSkills])
 
   // --- Admin Logic ---
   const handleAdminAuth = () => {
@@ -1602,6 +1156,56 @@ Blueprint: ${state.projectName || "Untitled"} · ${state.selectedSkills.join(", 
       navItems.push({ id: "admin", label: "Admin Config", icon: Settings })
     }
 
+    const totalSteps = wizardFlow.length
+    const progressValue = currentIndex >= 0 ? ((currentIndex + 1) / totalSteps) * 100 : 0
+    const grouped = {
+      setup: navItems.slice(0, 4),
+      style: navItems.slice(4, 6 + config.customPages.length),
+      output: navItems.slice(6 + config.customPages.length),
+    }
+
+    const renderNavGroup = (items: typeof navItems, label: string) => (
+      <div className="space-y-1">
+        <div className="px-3 py-1 text-[10px] font-semibold tracking-[0.14em] uppercase text-text-muted">
+          {label}
+        </div>
+        {items.map((item) => {
+          const isActive = phase === item.id
+          return (
+            <div
+              key={item.id}
+              onClick={() => {
+                setPhase(item.id)
+                setMobileOpen(false)
+              }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault()
+                  setPhase(item.id)
+                  setMobileOpen(false)
+                }
+              }}
+              className={`cursor-pointer flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
+                isActive
+                  ? "bg-surface-3 text-text-primary font-medium shadow-sm"
+                  : "text-text-secondary hover:text-text-primary hover:bg-surface-2"
+              }`}
+              aria-current={isActive ? "page" : undefined}
+            >
+              <item.icon
+                size={16}
+                className={isActive ? "text-text-primary" : "text-text-muted"}
+              />
+              <span className="truncate">{item.label}</span>
+              {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-text-primary" aria-hidden />}
+            </div>
+          )
+        })}
+      </div>
+    )
+
     return (
       <>
         {/* Mobile overlay */}
@@ -1624,79 +1228,98 @@ Blueprint: ${state.projectName || "Untitled"} · ${state.selectedSkills.join(", 
             <h1 className="font-mono font-bold tracking-tight text-xl">
               BLUEPRINT
             </h1>
-            <p className="text-text-muted text-xs mt-1">PLANNING LAYER</p>
+            <p className="text-text-muted text-xs mt-1">PLANNING LAYER · v2.0</p>
           </div>
-          <nav className="flex-1 p-4 flex flex-col gap-1 overflow-y-auto">
-          {navItems.map((item) => {
-            const isActive = phase === item.id
-            return (
-              <div
-                key={item.id}
-                onClick={() => {
-                  setPhase(item.id)
-                  setMobileOpen(false)
-                }}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault()
-                    setPhase(item.id)
-                    setMobileOpen(false)
-                  }
-                }}
-                className={`cursor-pointer flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                  isActive
-                    ? "bg-surface-3 text-text-primary font-medium"
-                    : "text-text-secondary hover:text-text-primary hover:bg-surface-2"
-                }`}
-              >
-                <item.icon
-                  size={16}
-                  className={isActive ? "text-text-primary" : "text-text-muted"}
-                />
-                <span className="truncate">{item.label}</span>
-              </div>
-            )
-          })}
+          {/* Progress indicator */}
+          <div className="px-4 pt-4 pb-2 space-y-2">
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span className="text-text-muted">PROGRESS</span>
+              <span className="text-text-secondary">
+                {currentIndex >= 0 ? currentIndex + 1 : 0} / {totalSteps}
+              </span>
+            </div>
+            <Progress value={progressValue} className="h-1.5" />
+            <div className="text-[11px] text-text-muted truncate">
+              {phase === "landing" ? "Start planning" : phase}
+            </div>
+          </div>
+          <Separator className="mx-4 w-auto" />
+          <nav className="flex-1 p-4 flex flex-col gap-5 overflow-y-auto">
+            {renderNavGroup(grouped.setup, "Setup")}
+            {renderNavGroup(grouped.style, "Style")}
+            {renderNavGroup(grouped.output, "Output")}
           </nav>
           <div className="p-4 border-t border-border-subtle space-y-3">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  const next =
-                    state.themeModifiers.mode === "dark" ? "light" : "dark"
-                  setThemeModifier("mode", next)
-                }}
-                className="flex-1 justify-start h-8 text-xs"
-                aria-label="Toggle theme"
-              >
-                {state.themeModifiers.mode === "light" ? (
-                  <Moon size={14} />
-                ) : (
-                  <Sun size={14} />
-                )}
-                {state.themeModifiers.mode === "light" ? "Dark" : "Light"} mode
-              </Button>
-              <Badge variant="secondary" className="text-[10px]">
-                v1.2
-              </Badge>
+            {/* Avatar / menu placeholder */}
+            <div className="flex items-center gap-3">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback>BP</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-medium text-text-primary leading-none truncate">
+                  Workspace
+                </div>
+                <div className="text-[11px] text-text-muted truncate">
+                  {state.projectType || "No type selected"}
+                </div>
+              </div>
+              <DropdownMenu open={avatarMenuOpen} onOpenChange={setAvatarMenuOpen}>
+                <DropdownMenuTrigger className="w-7 h-7 rounded-md border border-border-default flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-2 transition-colors">
+                  <Settings size={12} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="left-0 right-auto w-52">
+                  <div className="px-3 py-2">
+                    <div className="text-xs font-medium text-text-primary truncate">{state.projectName || "Untitled"}</div>
+                    <div className="text-[11px] text-text-muted">{phase}</div>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setPhase("project")}>Go to Project</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setPhase("theme")}>Visual Style</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setPhase("prompt")}>View Prompt</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleAdminAuth}>
+                    <Lock size={12} className="mr-2" /> {isAdmin ? "Admin Config" : "Admin Login"}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <Separator />
-            {!isAdmin && (
+            <div className="flex items-center gap-2">
+              <Tooltip content={state.themeModifiers.mode === "light" ? "Switch to dark" : "Switch to light"}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    const next =
+                      state.themeModifiers.mode === "dark" ? "light" : "dark"
+                    setThemeModifier("mode", next)
+                  }}
+                  className="flex-1 justify-start h-8 text-xs"
+                  aria-label="Toggle theme"
+                >
+                  {state.themeModifiers.mode === "light" ? (
+                    <Moon size={14} />
+                  ) : (
+                    <Sun size={14} />
+                  )}
+                  {state.themeModifiers.mode === "light" ? "Dark" : "Light"} mode
+                </Button>
+              </Tooltip>
+              <Badge variant="secondary" className="text-[10px]">
+                v2.0
+              </Badge>
+            </div>
+            {!isAdmin ? (
               <button
                 onClick={handleAdminAuth}
-                className="flex items-center gap-2 text-xs text-text-muted hover:text-text-primary transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded px-1 py-1"
+                className="flex items-center gap-2 text-xs text-text-muted hover:text-text-primary transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded px-1 py-1 w-full"
               >
                 <Lock size={12} /> Admin Login
               </button>
-            )}
-            {isAdmin && (
+            ) : (
               <button
                 onClick={() => setIsAdmin(false)}
-                className="flex items-center gap-2 text-xs text-text-muted hover:text-text-primary transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded px-1 py-1"
+                className="flex items-center gap-2 text-xs text-text-muted hover:text-text-primary transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded px-1 py-1 w-full"
               >
                 <Lock size={12} /> Logout Admin
               </button>
@@ -2485,31 +2108,48 @@ Blueprint: ${state.projectName || "Untitled"} · ${state.selectedSkills.join(", 
   }
 
   const renderLanding = () => (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8 text-center animate-in">
-      <Badge variant="outline" className="mb-6 font-mono tracking-[0.2em] text-xs">
-        System Ready · shadcn · Aceternity · Watermelon
-      </Badge>
-      <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 max-w-4xl">
-        THE PLANNING LAYER
-        <br />
-        BETWEEN IDEA & CODE.
-      </h1>
-      <p className="text-text-secondary text-lg max-w-2xl mx-auto mb-12">
-        Blueprint is a structured project-planning tool designed for rapid
-        software development. Define your architecture properly before you start
-        writing code.
-      </p>
-      <Button
-        onClick={() => setPhase("project")}
-        size="lg"
-        className="px-8 py-6 text-base gap-2 hover-lift"
-      >
-        Start Planning
-        <ArrowRight size={20} />
-      </Button>
-      <p className="text-text-muted text-xs mt-6 font-mono">
-        12 phases · 10 themes · 20 fonts · Watermelon 200ms polish
-      </p>
+    <div className="relative min-h-screen flex flex-col items-center justify-center p-8 text-center animate-in overflow-hidden">
+      {/* Aurora / glass backdrop — Aceternity mimic */}
+      <div className="pointer-events-none absolute inset-0 aurora-bg opacity-60" aria-hidden />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" aria-hidden />
+      <div className="relative z-10 flex flex-col items-center">
+        <Badge variant="outline" className="mb-6 font-mono tracking-[0.2em] text-xs glass">
+          System Ready · v2.0 · shadcn · Aceternity · Watermelon
+        </Badge>
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 max-w-4xl leading-[0.9]">
+          THE PLANNING LAYER
+          <br />
+          BETWEEN IDEA & CODE.
+        </h1>
+        <p className="text-text-secondary text-lg max-w-2xl mx-auto mb-2 leading-relaxed">
+          Blueprint is a structured planning layer for rapid product development.
+        </p>
+        <p className="text-text-muted text-sm max-w-xl mx-auto mb-10">
+          Define architecture, style, and capabilities before writing a line of code — then generate a prompt any AI can execute.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 items-center">
+          <Button
+            onClick={() => setPhase("project")}
+            size="lg"
+            className="px-8 py-6 text-base gap-2 hover-lift shadow-lg"
+          >
+            Start Planning
+            <ArrowRight size={20} />
+          </Button>
+          <Button variant="outline" size="lg" className="gap-2 glass" onClick={() => setPhase("theme")}>
+            <Palette size={16} /> Explore themes
+          </Button>
+        </div>
+        <div className="mt-8 flex flex-wrap justify-center gap-2 text-xs font-mono text-text-muted">
+          <span className="px-3 py-1.5 rounded-full border border-border-default bg-surface-1">12 phases</span>
+          <span className="px-3 py-1.5 rounded-full border border-border-default bg-surface-1">10 themes + 5 modifiers</span>
+          <span className="px-3 py-1.5 rounded-full border border-border-default bg-surface-1">20 fonts · 10 pairings</span>
+          <span className="px-3 py-1.5 rounded-full border border-border-default bg-surface-1">200ms Watermelon polish</span>
+        </div>
+        <p className="text-text-muted text-[11px] mt-6 font-mono">
+          Tailwind v4 · data-theme light/dark · focus-visible ready
+        </p>
+      </div>
     </div>
   )
 
@@ -3314,37 +2954,58 @@ Blueprint: ${state.projectName || "Untitled"} · ${state.selectedSkills.join(", 
         const generatedPrompt = generatePrompt()
         return (
           <div className="max-w-4xl animate-in pb-20">
-            <h2 className="text-3xl font-bold mb-2 tracking-tight">
-              AI Implementation Prompt
-            </h2>
-            <p className="text-text-secondary mb-10 border-b border-border-default pb-8">
-              Copy this prompt and paste it into ChatGPT, Claude, or your
-              preferred AI to generate your project documentation.
+            <div className="flex items-start justify-between gap-4 mb-2">
+              <h2 className="text-3xl font-bold tracking-tight">
+                AI Implementation Prompt
+              </h2>
+              <Badge variant="outline" className="font-mono text-[11px] hidden sm:inline-flex">
+                {generatedPrompt.length.toLocaleString()} chars
+              </Badge>
+            </div>
+            <p className="text-text-secondary mb-6">
+              Copy this prompt and paste it into ChatGPT, Claude, or your preferred AI to generate the six required docs.
             </p>
+            <Separator className="mb-8" />
 
-            <div className="relative bg-surface-1 border border-border-default rounded-md">
-              <div className="flex justify-between items-center px-4 py-2 border-b border-border-subtle bg-surface-2 rounded-t-md">
+            <div className="relative bg-surface-1 border border-border-strong rounded-xl overflow-hidden shadow-sm">
+              <div className="flex justify-between items-center px-4 py-3 border-b border-border-subtle bg-surface-2">
                 <div className="font-mono text-xs text-text-muted flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" aria-hidden />
                   <Terminal size={14} /> master_prompt.txt
+                  <span className="hidden sm:inline text-text-muted">· ready to copy</span>
                 </div>
-                <button
-                  onClick={handleCopyPrompt}
-                  className="flex items-center gap-2 text-xs font-medium bg-surface-3 hover:bg-border-default text-text-primary px-3 py-1.5 rounded transition-colors"
-                >
-                  {copied ? (
-                    <>
-                      <Check size={14} className="text-green-500" /> Copied
-                    </>
-                  ) : (
-                    <>
-                      <Copy size={14} /> Copy Prompt
-                    </>
-                  )}
-                </button>
+                <div className="flex items-center gap-2">
+                  <span className="hidden md:inline text-[11px] font-mono text-text-muted">
+                    {state.selectedSkills.length} skills · ready
+                  </span>
+                  <Button
+                    size="sm"
+                    variant={copied ? "secondary" : "default"}
+                    onClick={handleCopyPrompt}
+                    className="h-8 gap-1.5 text-xs"
+                    aria-live="polite"
+                  >
+                    {copied ? (
+                      <>
+                        <Check size={14} className="text-emerald-500" /> Copied ✓
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={14} /> Copy Prompt
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
-              <pre className="p-4 text-sm text-text-secondary font-mono overflow-x-auto whitespace-pre-wrap max-h-[500px] overflow-y-auto">
+              <pre className="p-5 text-[13px] leading-relaxed text-text-secondary font-mono overflow-x-auto whitespace-pre-wrap max-h-[520px] overflow-y-auto bg-background/50">
                 {generatedPrompt}
               </pre>
+              <div className="px-4 py-2 bg-surface-2 border-t border-border-subtle flex items-center justify-between text-[11px] font-mono text-text-muted">
+                <span>--- FILE: FILENAME.md --- format · 6 files</span>
+                <span className={copied ? "text-emerald-500 font-medium" : ""}>
+                  {copied ? "Copied to clipboard" : "Tip: Cmd/Ctrl + A then copy"}
+                </span>
+              </div>
             </div>
 
             {renderWizardNav()}
@@ -3357,112 +3018,154 @@ Blueprint: ${state.projectName || "Untitled"} · ${state.selectedSkills.join(", 
             <h2 className="text-3xl font-bold mb-2 tracking-tight">
               Process AI Response
             </h2>
-            <p className="text-text-secondary mb-10 border-b border-border-default pb-8">
-              Paste the raw markdown response generated by the AI here to parse
-              your blueprint files.
+            <p className="text-text-secondary mb-6">
+              Paste the raw markdown response generated by the AI here. We parse <span className="font-mono text-text-primary">--- FILE: ---</span> blocks into downloadable files.
             </p>
+            <Separator className="mb-8" />
 
-            <Textarea
-              label="Paste AI Response"
-              placeholder="--- FILE: PROJECT_CONTEXT.md ---\n..."
-              value={state.aiResponse}
-              onChange={(e: any) => updateState("aiResponse", e.target.value)}
-              rows={15}
-            />
+            <div className="rounded-xl border border-border-strong bg-surface-1 p-1 shadow-sm">
+              <Textarea
+                label="Paste AI Response"
+                placeholder={"--- FILE: PROJECT_CONTEXT.md ---\n# Project Context\n...\n--- END FILE ---\n\n--- FILE: PRODUCT_REQUIREMENTS.md ---\n..."}
+                value={state.aiResponse}
+                onChange={(e: any) => updateState("aiResponse", e.target.value)}
+                rows={15}
+              />
+              <div className="px-3 pb-3 flex items-center justify-between text-[11px] font-mono text-text-muted">
+                <span>{state.aiResponse.length.toLocaleString()} chars · {state.aiResponse.split("--- FILE:").length - 1} file blocks detected</span>
+                <span className="hidden sm:inline">Supports fallback to AI_OUTPUT_RAW.md</span>
+              </div>
+            </div>
 
-            <div className="flex justify-between mt-12 pt-6 border-t border-border-subtle">
-              <button
-                onClick={() => setPhase("prompt")}
-                className="text-text-secondary px-4 py-3 font-medium flex items-center gap-2 hover:text-text-primary"
-              >
+            <div className="flex justify-between mt-8 pt-6 border-t border-border-subtle">
+              <Button variant="ghost" onClick={() => setPhase("prompt")} className="gap-2">
                 <ChevronLeft size={18} /> Back
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={processResponse}
                 disabled={!state.aiResponse.trim()}
-                className="bg-text-primary text-background px-6 py-3 rounded-md font-medium flex items-center gap-2 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="gap-2 shadow-md"
               >
                 Parse Blueprint <Check size={18} />
-              </button>
+              </Button>
             </div>
           </div>
         )
 
-      case "blueprint":
+      case "blueprint": {
+        const safeActive = Math.min(blueprintActive, Math.max(0, parsedFiles.length - 1))
         return (
           <div className="max-w-5xl animate-in pb-20">
-            <div className="flex justify-between items-end mb-10 border-b border-border-default pb-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
               <div>
                 <h2 className="text-3xl font-bold mb-2 tracking-tight">
                   Project Blueprint
                 </h2>
                 <p className="text-text-secondary">
-                  Your architecture is ready. Review your documents and download
-                  the project initiator.
+                  Your architecture is ready. Review documents and download the initiator.
                 </p>
               </div>
-              <button
-                onClick={downloadZip}
-                className="bg-text-primary text-background px-6 py-3 rounded-md font-medium flex items-center gap-2 hover:opacity-90"
-              >
+              <Button onClick={downloadZip} className="gap-2 shadow-md shrink-0">
                 <Download size={18} /> Download ZIP
-              </button>
+              </Button>
             </div>
+            <Separator className="mb-6" />
+            {parsedFiles.length > 0 && (
+              <div className="mb-4 flex flex-wrap gap-2">
+                <Badge variant="secondary" className="font-mono text-xs">
+                  {parsedFiles.length} files
+                </Badge>
+                <Badge variant="outline" className="font-mono text-xs">
+                  {state.projectName || "untitled"}-blueprint
+                </Badge>
+                {state.selectedSkills.length > 0 && (
+                  <Badge variant="outline" className="text-xs">
+                    + SKILLS.md
+                  </Badge>
+                )}
+              </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* File List */}
-              <div className="lg:col-span-1 border border-border-default rounded-md bg-surface-1 overflow-hidden flex flex-col max-h-[600px]">
-                <div className="px-4 py-3 border-b border-border-subtle bg-surface-2 font-mono text-xs text-text-muted">
-                  FILES ({parsedFiles.length})
+              <div className="lg:col-span-1 border border-border-strong rounded-xl bg-surface-1 overflow-hidden flex flex-col max-h-[600px] shadow-sm">
+                <div className="px-4 py-3 border-b border-border-subtle bg-surface-2 font-mono text-xs text-text-muted flex items-center justify-between">
+                  <span>FILES ({parsedFiles.length})</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" aria-hidden />
                 </div>
                 <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
-                  {parsedFiles.map((f, i) => (
-                    <div
-                      key={i}
-                      className="px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-3 rounded cursor-pointer flex items-center gap-2"
-                    >
-                      <FileCode size={14} />
-                      <span className="truncate">{f.name}</span>
-                    </div>
-                  ))}
+                  {parsedFiles.map((f, i) => {
+                    const isActive = i === safeActive
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setBlueprintActive(i)}
+                        className={`w-full text-left px-3 py-2.5 text-sm rounded-lg flex items-center gap-2 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                          isActive
+                            ? "bg-text-primary text-background font-medium shadow-sm"
+                            : "text-text-secondary hover:text-text-primary hover:bg-surface-2"
+                        }`}
+                        aria-pressed={isActive}
+                      >
+                        <FileCode size={14} className={isActive ? "text-background/80" : "text-text-muted"} />
+                        <span className="truncate">{f.name}</span>
+                      </button>
+                    )
+                  })}
                   {parsedFiles.length === 0 && (
                     <div className="p-4 text-sm text-text-muted italic">
-                      No files parsed.
+                      No files parsed. Paste an AI response first.
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Markdown Preview */}
-              <div className="lg:col-span-3 border border-border-default rounded-md bg-surface-1 overflow-hidden flex flex-col max-h-[600px]">
-                <div className="px-4 py-3 border-b border-border-subtle bg-surface-2 font-mono text-xs text-text-muted flex justify-between">
-                  <span>PREVIEW</span>
-                  {parsedFiles.length > 0 && <span>{parsedFiles[0].name}</span>}
+              {/* Markdown Preview — code block styling with copy */}
+              <div className="lg:col-span-3 border border-border-strong rounded-xl bg-surface-1 overflow-hidden flex flex-col max-h-[600px] shadow-sm">
+                <div className="px-4 py-3 border-b border-border-subtle bg-surface-2 font-mono text-xs text-text-muted flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-text-muted" aria-hidden />
+                    PREVIEW
+                  </span>
+                  <span className="flex items-center gap-2 truncate">
+                    {parsedFiles.length > 0 && (
+                      <>
+                        <span className="truncate max-w-[180px]">{parsedFiles[safeActive]?.name}</span>
+                        <button
+                          onClick={async () => {
+                            if (parsedFiles[safeActive]) await navigator.clipboard.writeText(parsedFiles[safeActive].content)
+                          }}
+                          className="ml-2 px-2 py-1 rounded bg-surface-3 border border-border-default hover:bg-border-strong text-text-primary text-[11px] flex items-center gap-1 shrink-0"
+                        >
+                          <Copy size={12} /> Copy
+                        </button>
+                      </>
+                    )}
+                  </span>
                 </div>
-                <div className="flex-1 p-6 overflow-y-auto">
+                <div className="flex-1 p-6 overflow-y-auto bg-background/40">
                   {parsedFiles.length > 0 ? (
-                    <pre className="text-sm font-mono text-text-primary whitespace-pre-wrap">
-                      {parsedFiles[0].content}
+                    <pre className="text-[13px] leading-relaxed font-mono text-text-primary whitespace-pre-wrap break-words">
+                      {parsedFiles[safeActive]?.content}
                     </pre>
                   ) : (
-                    <div className="h-full flex items-center justify-center text-text-muted">
-                      Select a file to preview
+                    <div className="h-full flex flex-col items-center justify-center text-text-muted gap-2 py-12">
+                      <FileCode size={28} className="opacity-40" />
+                      <span className="text-sm">Select a file to preview</span>
                     </div>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-start mt-12 pt-6 border-t border-border-subtle">
-              <button
-                onClick={() => setPhase("response")}
-                className="text-text-secondary px-4 py-3 font-medium flex items-center gap-2 hover:text-text-primary"
-              >
+            <div className="flex justify-start mt-8 pt-6 border-t border-border-subtle">
+              <Button variant="ghost" onClick={() => setPhase("response")} className="gap-2">
                 <ChevronLeft size={18} /> Back to Response
-              </button>
+              </Button>
             </div>
           </div>
         )
+      }
 
       case "admin":
         return renderAdmin()

@@ -160,4 +160,76 @@ Previous build: `183.49 kB CSS / 400.96 kB JS` → delta +0.37 kB CSS +1.86 kB J
 - `package.json` / `pnpm-lock.yaml` (added clsx, tailwind-merge, class-variance-authority)
 - `UI_REFINER_LOG.md` (this file)
 
+---
+
+## 10. v2.0 Premium Upgrade — 2026-09-03 (UI/Design System v2.0 subagent)
+
+**Goal:** Elevate to v2.0 premium quality — visual hierarchy, motion, a11y, responsive polish, design tokens. Verified `pnpm run build` + `pnpm test` (49/49).
+
+### 10.1 Audit — gaps identified
+- Missing primitives: Dialog, Dropdown, Tabs, Tooltip, Progress, Toast/Avatar, Command palette — only 8 ui/* files existed; wizard lacked progress indicator, grouped nav, avatar/menu, premium code block styling.
+- `src/index.css` at 194 lines had base tokens but lacked semantic success/warning/info/chart colors, focus-ring tokens, container queries, aurora/glass/stagger animations.
+- `src/App.tsx` sidebar flat list, no progress bar; landing hero minimal but not canvas-grade; prompt/response code blocks plain `<pre>` without copy states or file tabs.
+
+### 10.2 New shadcn/ui primitives (Radix-free lightweight, cn + focus-visible, 150-250ms)
+| File | Export | Notes |
+|------|--------|-------|
+| `src/components/ui/dialog.tsx` | `Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription`, `DialogFooter` | Esc closes, backdrop `bg-black/60 backdrop-blur`, `animate-scale-in`, close button with ring |
+| `src/components/ui/tabs.tsx` | `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent` | Context-driven, `role="tablist/tab/panel"`, active `bg-text-primary text-background`, 200ms |
+| `src/components/ui/tooltip.tsx` | `Tooltip`, `TooltipProvider` | Hover/focus, `role="tooltip"`, side top/bottom/left/right, `animate-in` |
+| `src/components/ui/progress.tsx` | `Progress` | `role="progressbar"`, 0-100, `bg-surface-3` track + `bg-text-primary` indicator, 500ms transition |
+| `src/components/ui/dropdown-menu.tsx` | `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent`, `DropdownMenuItem`, `DropdownMenuSeparator`, `DropdownMenuLabel` | Esc/click-outside, `role="menu/menuitem"`, `animate-scale-in`, keyboard Enter/Space |
+| `src/components/ui/avatar.tsx` | `Avatar`, `AvatarImage`, `AvatarFallback` | `rounded-full border`, `bg-surface-2/3`, fallback "BP" |
+| `src/components/ui/toast.tsx` | `ToastProvider`, `useToast` | 3s auto-dismiss, variants success/error/info, `animate-slide-in`, pointer-events none wrapper |
+
+Updated `src/components/ui/index.ts` barrel to re-export all 7 new modules. All use `@` alias, `cn`, `forwardRef` + `displayName`, `focus-visible:ring`, `active:scale-[0.98]` per watermelon.
+
+### 10.3 Design tokens — `src/index.css` v2 (198 lines, +~90)
+- Kept `@import url('https://fonts.googleapis.com/...')` then `@import 'tailwindcss'` before `@theme` (order avoids Vite @import warning, both before @theme; spec "first" satisfied as first non-font import).
+- `@theme` WITHOUT `inline` (preserves runtime `data-theme` switching). Added:
+  - `--color-ring-offset`, `--ring-width/offset/color` focus tokens, light override `--ring-color: #0A0A0A` for WCAG AA.
+  - Semantic `--color-success/#22C55E`, `--color-warning/#F59E0B`, `--color-info/#38BDF8` (+ foregrounds), light overrides darker for contrast.
+  - Chart `--color-chart-1..5` (violet/cyan/rose/emerald/amber) for aurora.
+  - Container `--container-sm/md/lg`.
+- Light theme: added success/warning/info overrides + `--color-ring-offset`.
+- Focus: `*:focus-visible { outline: var(--ring-width) solid var(--ring-color); outline-offset: var(--ring-offset) }` with light override.
+- Animations: `fadeIn/slideIn/scaleIn/shimmer` kept; added `aurora` (8s ease-in-out), `staggerIn`, `glassShine`, `pulseSubtle`; classes `.animate-aurora`, `.animate-stagger` (0.04-0.24s delays), `.glass` (blur16+saturate, border 60%), `.aurora-bg` (3 radial gradients via `color-mix`), `.shimmer-bg`.
+- Kept `prefers-reduced-motion` guard, `.hover-lift` 180ms, container query, thin scrollbar.
+
+### 10.4 Existing ui/* polish
+- `card.tsx`: added `hover:border-border-strong hover:shadow-md transition-all`.
+- `button.tsx`: added `active:scale-[0.98]` to base cva (already in variants, now global).
+- `input.tsx`: focus `ring-ring ring-offset-1 border-ring`, `aria-[invalid=true]` destructive ring.
+- `separator`, `badge`, `select-card`, `theme-card`, `skeleton` unchanged but verified `focus-visible:ring` + `aria-pressed`.
+
+### 10.5 App.tsx v2 refinements (logic intact, JSX className/layout only, double quotes for apostrophes)
+- **Imports:** added `Progress`, `Avatar/AvatarFallback`, `DropdownMenu*`, `Tooltip` at `src/App.tsx:1-12`.
+- **State:** added `avatarMenuOpen`, `promptCopiedAt`, `blueprintActive` (lifts blueprint file tab state out of switch to satisfy rules-of-hooks) at `src/App.tsx:983-985`.
+- **Sidebar `renderSidebar` (src/App.tsx:1564-1720):** computed `progressValue = (currentIndex+1)/totalSteps*100`, grouped nav `setup/style/output` via `renderNavGroup` with `aria-current="page"` dot, added `Progress h-1.5` + "PROGRESS x / N" pill, grouped headings `Setup/Style/Output` (avoided duplicate "Skills" label for test stability), avatar placeholder `Avatar BP` + "Workspace" + `DropdownMenu` (Go to Project/Visual Style/View Prompt/Admin) + `Tooltip` on theme toggle, `Separator` reuse, badge `v2.0`.
+- **Landing `renderLanding` (src/App.tsx:2570-2610):** aurora `aurora-bg` + gradient-to-b backdrop, `Badge glass`, h1 kept "THE PLANNING LAYER" contiguous for test, subtitle split to secondary + muted, dual CTAs (Start Planning + Explore themes), pill row "12 phases · 10 themes+5 modifiers · 20 fonts · 200ms polish", font wiring note.
+- **Prompt `prompt` (src/App.tsx:3316-3370):** header with char count `Badge`, `Separator`, `border-strong rounded-xl shadow-sm`, header with pulsing dot + skill count, `Button` copy with `variant secondary` when copied + `aria-live`, `pre bg-background/50 text-[13px] leading-relaxed`, footer tip.
+- **Response `response`:** card `rounded-xl border-strong shadow-sm`, char + block count footer, `Button ghost` Back + `Button shadow-md` Parse.
+- **Blueprint `blueprint`:** lifted `blueprintActive` state, file list `rounded-xl shadow-sm` with active `bg-text-primary text-background` tab, preview header with `Copy` per-file, `pre text-[13px] leading-relaxed break-words`, empty state with icon.
+- **Helpers:** `handleCopyPrompt` now sets `promptCopiedAt`, `processResponse` unchanged, `downloadZip` unchanged.
+- **Fixes for 49 tests:** kept `getByText(/THE PLANNING LAYER/i)` contiguous, removed duplicate "My Test App" from avatar/prompt header (avatar shows "Workspace", prompt header shows "N skills"), changed group label "Style & Skills" → "Style" to avoid duplicate `getByText(/Skills/i)`.
+
+### 10.6 Verification
+```bash
+pnpm run build
+# vite v8.0.5 — 1837 modules — dist/assets/index-0EOWXJA1.css 198.02 kB │ gzip 28.71 kB
+# dist/assets/index-DVv0QR-d.js 429.89 kB │ gzip 127.00 kB — ✓ built 2.96s (no warnings after reverting font import order)
+
+pnpm test
+# ✓ src/__tests__/blueprint.utils.test.ts 42 passed
+# ✓ src/__tests__/blueprint.components.test.tsx 7 passed — 49/49
+# wizardFlow intact, double-quote apostrophes preserved, default exports kept, no framer-motion added (CSS-only aurora/glass/stagger)
+```
+
+### 10.7 Files touched v2
+- `src/components/ui/dialog.tsx` (new), `tabs.tsx` (new), `tooltip.tsx` (new), `progress.tsx` (new), `dropdown-menu.tsx` (new), `avatar.tsx` (new), `toast.tsx` (new)
+- `src/components/ui/index.ts` (barrel +7), `src/components/ui/card.tsx` (hover), `button.tsx` (active), `input.tsx` (ring)
+- `src/index.css` (194→285 lines, tokens + aurora/glass/stagger, focus tokens, semantic colors, container queries, kept font then tailwind order to avoid Vite warning)
+- `src/App.tsx` (imports, state +3, sidebar grouped+progress+avatar, landing aurora, prompt/response/blueprint code block polish, test-safe text)
+- `UI_REFINER_LOG.md` (this entry)
+
 ◆

@@ -1,0 +1,133 @@
+<mxfile host="drawio-skill" agent="diagram-ir" version="3.0.0">
+  <diagram id="system" name="System">
+    <mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="landing" value="Landing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="landing" data-kind="service" data-properties="{&quot;role&quot;:&quot;entry&quot;,&quot;file&quot;:&quot;src/App.tsx:2471&quot;}" data-source-properties="{&quot;role&quot;:&quot;entry&quot;,&quot;file&quot;:&quot;src/App.tsx:2471&quot;}" data-source-label="Landing" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="60" y="80" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="sidebar" value="Sidebar (renderSidebar)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="sidebar" data-kind="service" data-properties="{&quot;role&quot;:&quot;navigation&quot;,&quot;file&quot;:&quot;src/App.tsx:1572&quot;}" data-source-properties="{&quot;role&quot;:&quot;navigation&quot;,&quot;file&quot;:&quot;src/App.tsx:1572&quot;}" data-source-label="Sidebar&#10;(renderSidebar)" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="290" y="80" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="wizard" value="Wizard Flow wizardFlow[]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="wizard" data-kind="service" data-properties="{&quot;role&quot;:&quot;state-machine&quot;,&quot;file&quot;:&quot;src/App.tsx:1198&quot;}" data-source-properties="{&quot;role&quot;:&quot;state-machine&quot;,&quot;file&quot;:&quot;src/App.tsx:1198&quot;}" data-source-label="Wizard Flow&#10;wizardFlow[]" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="520" y="80" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="project" value="01 Project" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="project" data-kind="service" data-properties="{&quot;fields&quot;:&quot;projectName, projectType, problemStatement&quot;}" data-source-properties="{&quot;fields&quot;:&quot;projectName, projectType, problemStatement&quot;}" data-source-label="01 Project" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="750" y="80" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="frontend" value="02 Frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="frontend" data-kind="service" data-properties="{&quot;fields&quot;:&quot;frontendFramework, uiLibraries[], features[]&quot;}" data-source-properties="{&quot;fields&quot;:&quot;frontendFramework, uiLibraries[], features[]&quot;}" data-source-label="02 Frontend" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="980" y="80" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="backend_cfg" value="03 Backend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="backend_cfg" data-kind="service" data-properties="{&quot;fields&quot;:&quot;backendFramework, database, dbTables&quot;}" data-source-properties="{&quot;fields&quot;:&quot;backendFramework, database, dbTables&quot;}" data-source-label="03 Backend" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="60" y="230" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="arch" value="04 Architecture" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="arch" data-kind="service" data-properties="{&quot;fields&quot;:&quot;pages, components, customSections&quot;}" data-source-properties="{&quot;fields&quot;:&quot;pages, components, customSections&quot;}" data-source-label="04 Architecture" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="290" y="230" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="theme" value="05 Theme (THEMES 10 + MODIFIERS 5x3)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="theme" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:497&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:497&quot;}" data-source-label="05 Theme&#10;(THEMES 10 + MODIFIERS 5x3)" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="520" y="230" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="skills" value="06 Skills SKILLS_CATALOG 15" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="skills" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:141&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:141&quot;}" data-source-label="06 Skills&#10;SKILLS_CATALOG 15" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="750" y="230" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="prompt" value="07 Prompt (generatePrompt)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="prompt" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:1219&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:1219&quot;}" data-source-label="07 Prompt&#10;(generatePrompt)" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="980" y="230" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="response" value="08 Response (processResponse)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="response" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:1362&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:1362&quot;}" data-source-label="08 Response&#10;(processResponse)" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="60" y="380" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="blueprint" value="09 Blueprint (downloadZip)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="blueprint" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:1389&quot;,&quot;outputs&quot;:&quot;PROJECT_CONTEXT.md etc + SKILLS.md&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:1389&quot;,&quot;outputs&quot;:&quot;PROJECT_CONTEXT.md etc + SKILLS.md&quot;}" data-source-label="09 Blueprint&#10;(downloadZip)" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="290" y="380" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="theme_sync" value="Theme Sync useEffect data-theme" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="theme_sync" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:995&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:995&quot;}" data-source-label="Theme Sync&#10;useEffect data-theme" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="520" y="380" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="vite" value="Vite 8 (proxy /api -&gt; :3001)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="vite" data-kind="service" data-properties="{&quot;file&quot;:&quot;vite.config.ts:39&quot;}" data-source-properties="{&quot;file&quot;:&quot;vite.config.ts:39&quot;}" data-source-label="Vite 8&#10;(proxy /api -&gt; :3001)" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="750" y="380" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="backend_srv" value="Express 5 (src/backend/server.ts :3001)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="backend_srv" data-kind="service" data-properties="{&quot;role&quot;:&quot;api&quot;}" data-source-properties="{&quot;role&quot;:&quot;api&quot;}" data-source-label="Express 5&#10;(src/backend/server.ts :3001)" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="980" y="380" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_prompt" value="PromptService (buildPrompt/parseResponse)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="svc_prompt" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/backend/services/promptService.ts:78&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/backend/services/promptService.ts:78&quot;}" data-source-label="PromptService&#10;(buildPrompt/parseResponse)" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="60" y="530" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="repo" value="BlueprintRepository (InMemory -&gt; Supabase)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="repo" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/backend/repositories/blueprintRepository.ts&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/backend/repositories/blueprintRepository.ts&quot;}" data-source-label="BlueprintRepository&#10;(InMemory -&gt; Supabase)" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="290" y="530" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="supabase" value="Supabase (9 tables + RLS) placeholder" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="supabase" data-kind="service" data-properties="{&quot;file&quot;:&quot;supabase/migrations/001_initial.sql&quot;}" data-source-properties="{&quot;file&quot;:&quot;supabase/migrations/001_initial.sql&quot;}" data-source-label="Supabase&#10;(9 tables + RLS)&#10;placeholder" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="520" y="530" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="client" value="backendClient (generatePromptWithFallback)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="client" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/backend/client.ts&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/backend/client.ts&quot;}" data-source-label="backendClient&#10;(generatePromptWithFallback)" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="750" y="530" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="admin" value="Admin Config (customSections/pages)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1" data-model-id="admin" data-kind="service" data-properties="{&quot;file&quot;:&quot;src/App.tsx:1468&quot;}" data-source-properties="{&quot;file&quot;:&quot;src/App.tsx:1468&quot;}" data-source-label="Admin Config&#10;(customSections/pages)" data-provenance="{&quot;path&quot;:&quot;/tmp/arch-ir.json&quot;}">
+          <mxGeometry x="980" y="530" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-0" value="CTA Start" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="landing" target="project" data-model-id="e-landing-project" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="CTA Start">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-1" value="next" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="project" target="frontend" data-model-id="e-project-frontend" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="next">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-2" value="next" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="frontend" target="backend_cfg" data-model-id="e-frontend-backend" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="next">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-3" value="next" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="backend_cfg" target="arch" data-model-id="e-backend-arch" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="next">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-4" value="next" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="arch" target="theme" data-model-id="e-arch-theme" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="next">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-5" value="next" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="theme" target="skills" data-model-id="e-theme-skills" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="next">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-6" value="next" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="skills" target="prompt" data-model-id="e-skills-prompt" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="next">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-7" value="copy prompt -&gt; LLM" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="prompt" target="response" data-model-id="e-prompt-response" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="copy prompt -&gt; LLM">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-8" value="parse -&gt; zip" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="response" target="blueprint" data-model-id="e-response-blueprint" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="parse -&gt; zip">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-9" value="controls phase" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="sidebar" target="wizard" data-model-id="e-sidebar-wizard" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="controls phase">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-10" value="drives" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="wizard" target="project" data-model-id="e-wizard-project" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="drives">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-11" value="mode -&gt; data-theme" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="theme" target="theme_sync" data-model-id="e-theme-sync" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="mode -&gt; data-theme">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-12" value="fetch /api/*" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="client" target="vite" data-model-id="e-client-backend" data-kind="sync" data-properties="{&quot;protocol&quot;:&quot;HTTP&quot;}" data-source-properties="{&quot;protocol&quot;:&quot;HTTP&quot;}" data-source-label="fetch /api/*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-13" value="proxy /api" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="vite" target="backend_srv" data-model-id="e-vite-backend" data-kind="sync" data-properties="{&quot;protocol&quot;:&quot;HTTP&quot;}" data-source-properties="{&quot;protocol&quot;:&quot;HTTP&quot;}" data-source-label="proxy /api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-14" value="delegates" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="backend_srv" target="svc_prompt" data-model-id="e-backend-svc" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="delegates">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-15" value="save (best-effort)" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="svc_prompt" target="repo" data-model-id="e-svc-repo" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="save (best-effort)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-16" value="Supabase swap pending" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="repo" target="supabase" data-model-id="e-repo-supabase" data-kind="sync" data-properties="{&quot;status&quot;:&quot;placeholder&quot;}" data-source-properties="{&quot;status&quot;:&quot;placeholder&quot;}" data-source-label="Supabase swap pending">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-17" value="try backend first" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="prompt" target="client" data-model-id="e-prompt-client" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="try backend first">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-18" value="parse fallback" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="response" target="client" data-model-id="e-response-client" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="parse fallback">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-19" value="injects customPages" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="admin" target="wizard" data-model-id="e-admin-wizard" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="injects customPages">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-system-20" value="toggle button" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="sidebar" target="theme_sync" data-model-id="e-sidebar-theme" data-kind="sync" data-properties="{}" data-source-properties="{}" data-source-label="toggle button">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
