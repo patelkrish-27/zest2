@@ -1,0 +1,10 @@
+{
+  "description": "Streamline project planning for hackathons with a guided interface that helps users define problem statements, select tech stacks, and generate essential documentation.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
