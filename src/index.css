@@ -1,13 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Poppins:wght@400;500;600;700&family=Geologica:wght@400;600&family=Sora:wght@400;600&family=Outfit:wght@400;600&display=swap');
 @import 'tailwindcss';
 
-@theme inline {
+@theme {
+  /* Tailwind v4: @theme WITHOUT `inline` keeps colors as CSS vars so html[data-theme="light"] can override at runtime.
+     Using `inline` inlines them to static hex (bg-surface-1:#111) and breaks dynamic theming — hence light mode only flipped borders. */
   --font-sans: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
+  /* Core palette — dark default */
   --color-background: #090909;
   --color-foreground: #F5F5F5;
-  
+
   --color-surface-1: #111111;
   --color-surface-2: #181818;
   --color-surface-3: #222222;
@@ -20,12 +23,76 @@
   --color-border-default: #262626;
   --color-border-strong: #3A3A3A;
   --color-border-subtle: #1A1A1A;
+
+  /* Extended shadcn/radix tokens — derived from dark */
+  --color-ring: #A3A3A3;
+  --color-accent: #222222;
+  --color-accent-foreground: #F5F5F5;
+  --color-muted: #1A1A1A;
+  --color-muted-foreground: #737373;
+  --color-card: #111111;
+  --color-card-foreground: #F5F5F5;
+  --color-popover: #181818;
+  --color-popover-foreground: #F5F5F5;
+  --color-primary: #F5F5F5;
+  --color-primary-foreground: #090909;
+  --color-secondary: #222222;
+  --color-secondary-foreground: #F5F5F5;
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #FFFFFF;
+  --color-input: #262626;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+
+/* Light theme override — toggled via data-theme="light" on <html> */
+:root[data-theme="light"] {
+  --color-background: #FAFAFA;
+  --color-foreground: #0A0A0A;
+  --color-surface-1: #FFFFFF;
+  --color-surface-2: #F5F5F5;
+  --color-surface-3: #E5E5E5;
+  --color-text-primary: #0A0A0A;
+  --color-text-secondary: #525252;
+  --color-text-muted: #737373;
+  --color-text-disabled: #A3A3A3;
+  --color-border-default: #E5E5E5;
+  --color-border-strong: #D4D4D4;
+  --color-border-subtle: #F5F5F5;
+  --color-ring: #404040;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #0A0A0A;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #0A0A0A;
+  --color-primary: #0A0A0A;
+  --color-primary-foreground: #FAFAFA;
+  --color-accent: #F5F5F5;
+  --color-accent-foreground: #0A0A0A;
+  --color-muted: #F5F5F5;
+  --color-muted-foreground: #737373;
+  --color-secondary: #F5F5F5;
+  --color-secondary-foreground: #0A0A0A;
+  --color-destructive: #DC2626;
+  --color-destructive-foreground: #FFFFFF;
+  --color-input: #E5E5E5;
 }
 
 :root {
   background-color: var(--color-background);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+* {
+  border-color: var(--color-border-default);
 }
 
 body {
@@ -33,9 +100,22 @@ body {
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* Custom Scrollbar for a sleek developer tool feel */
+/* Selection */
+::selection {
+  background: var(--color-text-primary);
+  color: var(--color-background);
+}
+
+/* Focus visible — accessible ring 150-250ms watermelon timing */
+*:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* Custom Scrollbar for sleek developer tool feel */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -50,12 +130,65 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-border-strong);
 }
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-surface-3) var(--color-background);
+}
 
-/* Animations */
+/* Animations — watermelon micro-interaction timing 150-250ms */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
 .animate-in {
-  animation: fadeIn 0.3s ease-out forwards;
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-slide-in {
+  animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-scale-in {
+  animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Smooth theme transitions — respect reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+  :root, :root * {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  /* Exclude elements that manage their own transitions */
+  :root .no-theme-transition,
+  :root .no-theme-transition * {
+    transition: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Utility: subtle Watermelon hover lift */
+.hover-lift {
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms ease, border-color 180ms ease;
+}
+.hover-lift:hover {
+  transform: translateY(-1px);
+}
+.hover-lift:active {
+  transform: translateY(0px) scale(0.98);
 }
