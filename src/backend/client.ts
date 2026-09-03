@@ -1,9 +1,8 @@
 // src/backend/client.ts — frontend fetch wrapper with graceful fallback
-// Usage from App.tsx: try backendClient.generatePrompt(state), fallback to local generatePrompt()
 import type { PartialBlueprintState, SkillDTO, ParsedFile } from "./types"
 
 const API_BASE =
-  (import.meta as unknown as { env: Record<string, string | undefined> }).env.VITE_API_BASE ?? "" // empty => same-origin via Vite proxy
+  (import.meta as unknown as { env: Record<string, string | undefined> }).env.VITE_API_BASE ?? ""
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -22,6 +21,35 @@ export const backendClient = {
     return apiFetch("/api/health")
   },
 
+  async generateArchitecturePlanningPrompt(state: PartialBlueprintState): Promise<string> {
+    const data = await apiFetch<{ prompt: string }>("/api/generate-architecture-prompt", {
+      method: "POST",
+      body: JSON.stringify({ state }),
+    })
+    return data.prompt
+  },
+
+  async parseArchitecturePlan(response: string): Promise<{
+    summary: string
+    pages: Array<{ route: string; name: string; purpose: string; keyInteractions: string[] }>
+    components: Array<{ name: string; purpose: string; usedOn: string[] }>
+    architecture: {
+      frontendFlow: string[]
+      backendModules: string[]
+      apiEndpoints: Array<{ method: string; path: string; purpose: string }>
+      dataFlow: string[]
+      databaseEntities: string[]
+      dependencies: string[]
+      importantDecisions: string[]
+    }
+  }> {
+    const data = await apiFetch<{ plan: Awaited<ReturnType<typeof backendClient.parseArchitecturePlan>> }>("/api/parse-architecture-plan", {
+      method: "POST",
+      body: JSON.stringify({ response }),
+    })
+    return data.plan
+  },
+
   async generatePrompt(state: PartialBlueprintState, config?: { customSections?: { id: string; title: string }[]; skillsCatalog?: SkillDTO[] }): Promise<string> {
     const data = await apiFetch<{ prompt: string }>("/api/generate-prompt", {
       method: "POST",
@@ -38,12 +66,7 @@ export const backendClient = {
     return data.files
   },
 
-  // Try backend, fallback to local logic (injected) if unavailable — never throws for UI
-  async generatePromptWithFallback(
-    state: PartialBlueprintState,
-    fallback: () => string,
-    config?: { customSections?: { id: string; title: string }[]; skillsCatalog?: SkillDTO[] }
-  ): Promise<{ prompt: string; source: "backend" | "fallback"; error?: string }> {
+  async generatePromptWithFallback(state: PartialBlueprintState, fallback: () => string, config?: { customSections?: { id: string; title: string }[]; skillsCatalog?: SkillDTO[] }): Promise<{ prompt: string; source: "backend" | "fallback"; error?: string }> {
     try {
       const prompt = await this.generatePrompt(state, config)
       return { prompt, source: "backend" }
@@ -54,10 +77,7 @@ export const backendClient = {
     }
   },
 
-  async parseResponseWithFallback(
-    aiResponse: string,
-    fallback: () => ParsedFile[]
-  ): Promise<{ files: ParsedFile[]; source: "backend" | "fallback"; error?: string }> {
+  async parseResponseWithFallback(aiResponse: string, fallback: () => ParsedFile[]): Promise<{ files: ParsedFile[]; source: "backend" | "fallback"; error?: string }> {
     try {
       const files = await this.parseResponse(aiResponse)
       return { files, source: "backend" }
