@@ -1,5 +1,4 @@
-// src/backend/types.ts — shared domain types (mirrors src/App.tsx AppState)
-// Keep in sync with frontend — backend validates AppState via Zod at runtime
+// src/backend/types.ts — shared domain types
 export interface BlueprintState {
   projectName: string
   projectType: string
@@ -24,7 +23,6 @@ export interface BlueprintState {
   selectedSkills: string[]
 }
 
-// Minimal shape for generatePrompt — all fields optional for graceful fallback
 export type PartialBlueprintState = Partial<BlueprintState>
 
 export interface GeneratePromptRequest {
@@ -34,6 +32,10 @@ export interface GeneratePromptRequest {
     customSections?: { id: string; pageId: string; title: string; description: string; options: string[]; isMulti: boolean }[]
     skillsCatalog?: SkillDTO[]
   }
+}
+
+export interface ArchitecturePlanRequest {
+  state: PartialBlueprintState
 }
 
 export interface SkillDTO {
