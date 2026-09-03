@@ -75,7 +75,95 @@ export const FONT_PAIRINGS = [
   { id: "instrument-both", label: "10 Instrument Sans + Serif", heading: "Instrument Sans", body: "Instrument Sans", mono: "JetBrains Mono", vibe: "sophisticated editorial" },
 ] as const
 
+export interface ArchitecturePlan {
+  summary: string
+  pages: Array<{ route: string; name: string; purpose: string; keyInteractions: string[] }>
+  components: Array<{ name: string; purpose: string; usedOn: string[] }>
+  architecture: {
+    frontendFlow: string[]
+    backendModules: string[]
+    apiEndpoints: Array<{ method: string; path: string; purpose: string }>
+    dataFlow: string[]
+    databaseEntities: string[]
+    dependencies: string[]
+    importantDecisions: string[]
+  }
+}
+
 export class PromptService {
+  buildArchitecturePlanningPrompt(state: PartialBlueprintState): string {
+    return `You are the senior product architect for a hackathon team. Analyze the project below and produce the architecture plan the team should implement BEFORE writing code.
+
+# PROJECT
+Name: ${state.projectName || "Untitled"}
+Type: ${state.projectType || "Not specified"}
+Problem statement:
+${state.problemStatement || "Not specified"}
+
+# FRONTEND
+Framework: ${state.frontendFramework || "Not specified"}
+UI libraries: ${state.uiLibraries?.join(", ") || "Not specified"}
+Capabilities: ${state.features?.join(", ") || "None specified"}
+
+# BACKEND
+Framework: ${state.backendFramework || "Not specified"}
+Database: ${state.database || "Not specified"}
+
+# YOUR TASK
+Design a practical hackathon-sized solution. Do not ask the user questions. Infer sensible choices from the problem statement and selected stack.
+
+Return ONLY valid JSON. No markdown fences. Use exactly this shape:
+{
+  "summary": "one paragraph describing the recommended system",
+  "pages": [
+    {
+      "route": "/example",
+      "name": "Example",
+      "purpose": "what this page does",
+      "keyInteractions": ["interaction 1", "interaction 2"]
+    }
+  ],
+  "components": [
+    {
+      "name": "ComponentName",
+      "purpose": "what it owns",
+      "usedOn": ["/example"]
+    }
+  ],
+  "architecture": {
+    "frontendFlow": ["step 1", "step 2"],
+    "backendModules": ["module 1", "module 2"],
+    "apiEndpoints": [
+      { "method": "GET", "path": "/api/example", "purpose": "what it does" }
+    ],
+    "dataFlow": ["source -> transform -> destination"],
+    "databaseEntities": ["entity 1", "entity 2"],
+    "dependencies": ["dependency 1"],
+    "importantDecisions": ["decision 1"]
+  }
+}
+
+Rules:
+- Pages must cover the primary user journey implied by the problem statement, including useful loading, empty, success, and error states where appropriate.
+- Prefer 4-8 meaningful pages over many tiny pages.
+- Components must be reusable product components, not one-off wrappers.
+- Keep architecture consistent with the selected frontend and backend stacks.
+- Do not invent AI features just because this is being planned with Gemini.
+- Optimize for a hackathon MVP: high value, low implementation risk.
+- Include route names, component names, API boundaries, data flow, and database entities that developers can directly implement.`
+  }
+
+  parseArchitecturePlan(response: string): ArchitecturePlan | null {
+    try {
+      const clean = response.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "")
+      const parsed = JSON.parse(clean) as ArchitecturePlan
+      if (!parsed || !Array.isArray(parsed.pages) || !Array.isArray(parsed.components) || !parsed.architecture) return null
+      return parsed
+    } catch {
+      return null
+    }
+  }
+
   buildPrompt(
     state: PartialBlueprintState,
     customSections: { id: string; title: string }[] = [],
@@ -192,7 +280,7 @@ After extracting this zip, run the install command(s) below in your project root
 ${skills
   .map(
     (s) =>
-      `## ${s.name} — \`${s.id}\`\n\n- **What:** ${s.description}\n- **Package / Skill:** \`${s.package}\`\n- **Source:** ${s.source}\n- **Docs:** ${s.docsUrl}\n- **Concepts:** ${s.concepts}\n- **Highlights:** ${s.highlights.join(" · ")}\n- **Install:**\n\n\`\`\`bash\n${s.installCmd}\n\`\`\`\n`
+      `## ${s.name} — \`${s.id}\`\n\n- **What:** ${s.description}\n- **Package / Skill:** \`${s.package}\`\n- **Source:** ${s.source}\n- **Docs:** ${s.docsUrl}\n- **Concepts:** ${s.concepts}\n- **Highlights:** ${s.highlights.join(" · ")}\n- **Install:**\n\n\`\`\`bash\n${s.installCmd}\n\`\`\`\n`,
   )
   .join("\n")}
 
