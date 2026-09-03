@@ -1,6 +1,21 @@
 // src/backend/client.ts — frontend fetch wrapper with graceful fallback
 import type { PartialBlueprintState, SkillDTO, ParsedFile } from "./types"
 
+export interface ArchitecturePlanClient {
+  summary: string
+  pages: Array<{ route: string; name: string; purpose: string; keyInteractions: string[] }>
+  components: Array<{ name: string; purpose: string; usedOn: string[] }>
+  architecture: {
+    frontendFlow: string[]
+    backendModules: string[]
+    apiEndpoints: Array<{ method: string; path: string; purpose: string }>
+    dataFlow: string[]
+    databaseEntities: string[]
+    dependencies: string[]
+    importantDecisions: string[]
+  }
+}
+
 const API_BASE =
   (import.meta as unknown as { env: Record<string, string | undefined> }).env.VITE_API_BASE ?? ""
 
@@ -29,21 +44,8 @@ export const backendClient = {
     return data.prompt
   },
 
-  async parseArchitecturePlan(response: string): Promise<{
-    summary: string
-    pages: Array<{ route: string; name: string; purpose: string; keyInteractions: string[] }>
-    components: Array<{ name: string; purpose: string; usedOn: string[] }>
-    architecture: {
-      frontendFlow: string[]
-      backendModules: string[]
-      apiEndpoints: Array<{ method: string; path: string; purpose: string }>
-      dataFlow: string[]
-      databaseEntities: string[]
-      dependencies: string[]
-      importantDecisions: string[]
-    }
-  }> {
-    const data = await apiFetch<{ plan: Awaited<ReturnType<typeof backendClient.parseArchitecturePlan>> }>("/api/parse-architecture-plan", {
+  async parseArchitecturePlan(response: string): Promise<ArchitecturePlanClient> {
+    const data = await apiFetch<{ plan: ArchitecturePlanClient }>("/api/parse-architecture-plan", {
       method: "POST",
       body: JSON.stringify({ response }),
     })
